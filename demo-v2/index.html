@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>promise demo -v2</title>
+</head>
+<body>
+<script type="text/javascript">
+	//定义
+	const async = () => {
+        let _resolve;
+        let _reject;
+
+        
+        return {
+            resolve: value => {
+                console.log('resolve value', value);
+                console.log('_resolve', _resolve)
+                _resolve && _resolve(value);
+            },
+            reject: value => {
+                console.log('reject value', value);
+                console.log('_reject', _reject)
+                _reject && _reject(value);
+            },
+        	then: (resolve, reject) => {
+        		_reject = reject;
+        		_resolve = resolve;
+        	}
+        }
+	};
+    
+    const ownPromise = asyncCallback => {
+        const promise = async();
+        asyncCallback(promise.resolve, promise.reject)
+        return promise 
+    }
+
+    //调用
+    const obj = ownPromise((resolve, reject) => {
+        setTimeout(() => {
+          var rd = Math.random();
+          console.log('rd', rd);
+          console.log(resolve)
+          if (rd > 0.5)
+            resolve(rd)
+          else
+            reject('bad luck...')
+        }, 1000)
+    })
+
+    obj.then(json => {console.log(' then resolve', json)}, err => {
+        console.log('then reject', err)
+    });
+    console.log('obj', obj)
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>promise demo -v1</title>
+</head>
+<body>
+<script type="text/javascript">
+	//定义
+	const async = () => {
+        let _resolve;
+        let _reject;
+
+		setTimeout(() => {
+			const rd = Math.random();
+			console.log('current rd:' + rd)
+			if(rd > 0.5) {
+				_resolve && _resolve(rd)
+			} else {
+				_reject && _reject(new Error('bad luck...'))
+			}
+		}, 1000);
+        
+        return {
+        	then: (resolve, reject) => {
+        		_reject = reject;
+        		_resolve = resolve;
+        	}
+        }
+	};
+    //调用
+    async().then(json => {
+    	console.log(json);	
+    }, error => {
+    	console.log(error)
+    });
+</script>
+</body>
+</html>

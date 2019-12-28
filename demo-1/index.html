@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>promise demo</title>
+</head>
+<body>
+<script type="text/javascript">
+	//定义
+	const async = (callback) => {
+		setTimeout(() => {
+			const rd = Math.random();
+			console.log('current rd:' + rd)
+			if(rd > 0.5) {
+				callback && callback(null, rd)
+			} else {
+				callback && callback(new Error('bad luck...'))
+			}
+		}, 1000);
+	}
+    //调用
+    async((err, result) => {
+    	if (err) {
+    		console.log(`the reson fail is: ${err}`);
+    		return;
+    	} 
+    	console.log(`success :${result}`)
+    });
+
+</script>
+</body>
+</html>
