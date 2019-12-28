@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>promise demo -v6</title>
+</head>
+<body>
+
+<h1>支持链式调用,请查看浏览器控制输出.</h1>
+
+<script type="text/javascript">
+
+    const PENDING   = Symbol('pending');
+    const RESOLVE = Symbol('resolve');
+    const REJECTED  = Symbol('rejected');
+    
+    
+    function makeThenable(value, status) {
+        if (value && typeof value.then === 'function') {
+            return value;
+        }
+
+        if (status === RESOLVE) {
+            return {
+                then: (resolve, reject) => {
+                    return makeThenable(resolve(value), RESOLVE)
+                }
+            }
+        }
+
+        if (status === REJECTED) {
+            return {
+                then: (resolve, reject) => {
+                    return makeThenable(reject(value), REJECTED)
+                }
+            }
+        }
+    }
+
+	//定义
+	const async = () => {
+        let status = PENDING;
+        let _resolve;
+        let _reject;
+        let save_value;
+        
+        return {
+            resolve: value => {
+                if (status !== PENDING) return
+                status = RESOLVE;
+                save_value = makeThenable(value, RESOLVE);
+                console.log('resolve value', value);
+                console.log('_resolve', _resolve)
+                _resolve && save_value.then(_resolve, null);
+            },
+            reject: value => {
+                if (status !== PENDING) return
+                status = REJECTED;
+                save_value = makeThenable(value, REJECTED);
+                console.log('reject value', value);
+                console.log('_reject', _reject)
+                _reject && save_value.then(null, _reject);
+            },
+            promise: {
+                then: (resolve, reject) => {
+                    console.log('thenthenthenthen')
+                    const newAsync = async();
+                    const resolveFn = value => {
+                        newAsync.resolve(resolve(value))
+                    }
+                    const rejectFn = value => {
+                        newAsync.resolve(reject(value))
+                    }
+
+                    if (status === PENDING) {
+                        _reject = rejectFn;
+                        _resolve = resolveFn;
+                    } else {
+                        value.then(resolveFn, rejectFn)
+                    }
+                    return newAsync.promise                    
+                }
+            }
+        }
+	};
+    
+    const ownPromise = asyncCallback => {
+        const promise = async();
+        asyncCallback(promise.resolve, promise.reject)
+        return promise.promise 
+    }
+
+    //调用
+    const obj = ownPromise((resolve, reject) => {
+        console.log('index 1')
+        setTimeout(() => {
+          var rd = Math.random();
+          console.log('rd', rd);
+          console.log(resolve)
+          console.log('index 3')
+          if (rd > 0.5)
+            resolve(rd)
+          else
+            reject('bad luck...')
+        }, 1000)
+        console.log('index 2')
+    })
+    .then(json => {
+        console.log(' then1 resolve', json)
+        return 'return  then1 resolve' + json
+    }, err => {
+        console.log('then1 reject', err)
+        return 'return  then1 reject' + err
+    })
+    .then(json => {
+        console.log('then2 resolve', json)
+    }, err => {
+        console.log('reject', err)
+    });
+    
+</script>
+</body>
+</html>

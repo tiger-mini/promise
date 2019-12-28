@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>promise demo -v4</title>
+	<title>promise demo -v7</title>
 </head>
 <body>
-<h1>
-   支持状态管理,请查看浏览器控制输出. 
-</h1>
 
+保存异步调用的结果,请查看浏览器控制输出.
 
 <script type="text/javascript">
 
@@ -21,12 +19,13 @@
         let status = PENDING;
         let _resolve;
         let _reject;
-
+        let save_value;
         
         return {
             resolve: value => {
                 if (status !== PENDING) return
                 status = RESOLVE;
+                save_value = value;
                 console.log('resolve value', value);
                 console.log('_resolve', _resolve)
                 _resolve && _resolve(value);
@@ -34,12 +33,21 @@
             reject: value => {
                 if (status !== PENDING) return
                 status = REJECTED;
+                save_value = value;
                 console.log('reject value', value);
                 console.log('_reject', _reject)
                 _reject && _reject(value);
             },
             promise: {
                 then: (resolve, reject) => {
+                    if (status === REJECTED) {
+                        reject && reject(save_value)
+                        return;
+                    }
+                    if (status === RESOLVE) {
+                        resolve && resolve(save_value)
+                        return;
+                    }
                     _reject = reject;
                     _resolve = resolve;
                 }
@@ -66,8 +74,15 @@
         }, 1000)
     });
 
-    obj.then(json => {console.log(' then resolve', json)}, err => {
+    obj
+    .then(json => {console.log(' then resolve', json)}, err => {
         console.log('then reject', err)
+    });
+
+    obj.then(succe => {
+        console.log('second success', succe)
+    }, error => {
+        console.log('second error', error)
     });
 
     console.log('obj',obj)
