@@ -48,27 +48,27 @@
                 if (status !== PENDING) return
                 status = RESOLVE;
                 save_value = makeThenable(value, RESOLVE);
-                console.log('resolve value', value);
-                console.log('_resolve', _resolve)
+                //console.log('resolve value', value);
+                //console.log('_resolve', _resolve)
                 _resolve && save_value.then(_resolve, null);
             },
             reject: value => {
                 if (status !== PENDING) return
                 status = REJECTED;
                 save_value = makeThenable(value, REJECTED);
-                console.log('reject value', value);
-                console.log('_reject', _reject)
+                //console.log('reject value', value);
+                //console.log('_reject', _reject)
                 _reject && save_value.then(null, _reject);
             },
             promise: {
                 then: (resolve, reject) => {
-                    console.log('thenthenthenthen')
+                    //console.log('thenthenthenthen')
                     const newAsync = async();
                     const resolveFn = value => {
                         newAsync.resolve(resolve(value))
                     }
                     const rejectFn = value => {
-                        newAsync.resolve(reject(value))
+                        newAsync.reject(reject(value))
                     }
 
                     if (status === PENDING) {
@@ -91,30 +91,30 @@
 
     //调用
     const obj = ownPromise((resolve, reject) => {
-        console.log('index 1')
+        console.log('index 1:')
         setTimeout(() => {
           var rd = Math.random();
-          console.log('rd', rd);
-          console.log(resolve)
-          console.log('index 3')
+          //console.log('rd', rd);
+          //console.log(resolve)
+          console.log('index 2:')
           if (rd > 0.5)
             resolve(rd)
           else
             reject('bad luck...')
         }, 1000)
-        console.log('index 2')
+        console.log('index 3:')
     })
     .then(json => {
-        console.log(' then1 resolve', json)
-        return 'return  then1 resolve' + json
+        console.log('4-1:', json)
+        return 'return  4-1:' + json
     }, err => {
-        console.log('then1 reject', err)
-        return 'return  then1 reject' + err
+        console.log('4-2:', err)
+        return 'return 4-2:' + err
     })
     .then(json => {
-        console.log('then2 resolve', json)
+        console.log('5-1:', json)
     }, err => {
-        console.log('reject', err)
+        console.log('reject 5-1:', err)
     });
     
 </script>
